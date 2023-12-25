@@ -2,7 +2,7 @@
 
 CC = gcc
 CFLAGS = -Wall -Wextra
-LIBS = -lz  # Ajoute l'option -lz pour inclure la bibliothèque zlib
+LIBS = -lz
 
 all: program
 
