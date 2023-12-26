@@ -1,44 +1,35 @@
 // archive.c
 
 #include "../include/archive.h"
-#include "../include/typedef.h"
 #include "../include/utils.h"
 
 char buffer[BLOCK_SIZE];
 
-
-void list_files(const char *archive_path)
+void list_files(const char *archivePath)
 {
-    gzFile archive = gzopen(archive_path, "rb");
-    if (archive == NULL)
-    {
-        perror("Erreur lors de l'ouverture de l'archive");
-        fprintf(stderr, "errno = %d\n", errno);
-        fprintf(stderr, "Chemin d'accès au fichier : %s\n", archive_path);
-        exit(EXIT_FAILURE);
-    }
+    gzFile archive = gzopen(archivePath, "rb");
+    checkFileOpenError(archive, archivePath);
 
-    // Boucle de lecture des entêtes des fichiers dans l'archive
+    char buffer[BLOCK_SIZE];
+
     while (gzread(archive, buffer, BLOCK_SIZE) > 0)
     {
-        struct header_tar *file_header = (struct header_tar *)buffer;
+        struct header_tar *fileHeader = (struct header_tar *)buffer;
 
-        // Vérifier si l'entête est un bloc rempli de zéros, indiquant la fin de l'archive
-        if (memcmp(file_header->name, "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0", 20) == 0)
+        if (isEndOfArchive(fileHeader))
         {
-            break; // Fin de l'archive
+            break; // End of the archive
         }
 
-        // Afficher le nom du fichier de l'entête
-        printf("%s\n", file_header->name);
+        // Display the name of the file from the header
+        printf("%s\n", fileHeader->name);
 
-        // Se déplacer à la position suivante de l'entête
+        // Move to the next header position
         gzseek(archive, BLOCK_SIZE - sizeof(struct header_tar), SEEK_CUR);
     }
 
     gzclose(archive);
 }
-
 
 void extract_archive(const char *archive_path, const char *output_dir)
 {
@@ -119,7 +110,6 @@ void extract_archive(const char *archive_path, const char *output_dir)
 
     gzclose(archive);
 }
-
 
 void create_archive(const char *output_archive, const char *input_files[], int num_files)
 {
@@ -202,4 +192,3 @@ void create_archive(const char *output_archive, const char *input_files[], int n
 
     gzclose(archive);
 }
-

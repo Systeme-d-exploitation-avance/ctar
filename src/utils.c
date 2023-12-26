@@ -26,3 +26,19 @@ int octal_to_int(const char *octal_str)
 {
     return strtol(octal_str, NULL, 8);
 }
+
+void checkFileOpenError(gzFile file, const char *filePath)
+{
+    if (file == NULL)
+    {
+        perror("Erreur lors de l'ouverture de l'archive");
+        fprintf(stderr, "errno = %d\n", errno);
+        fprintf(stderr, "Chemin d'accès au fichier : %s\n", filePath);
+        exit(EXIT_FAILURE);
+    }
+}
+
+int isEndOfArchive(struct header_tar *fileHeader)
+{
+    return memcmp(fileHeader->name, "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0", 20) == 0;
+}
