@@ -6,6 +6,7 @@
 #include "typedef.h"
 #include <errno.h>
 #include <sys/stat.h>
+#include <sys/types.h>
 #include <stddef.h>
 #include <zlib.h>
 #include <stdio.h>
@@ -13,6 +14,8 @@
 #include <string.h>
 #include <stdbool.h>
 #include <dirent.h>
+#include <libgen.h>
+#include <limits.h>
 
 int create_directory(const char *path);
 int get_file_size(const char *file_path);
@@ -23,6 +26,7 @@ gzFile open_archive(const char *archive_path);
 bool is_end_of_archive(const char *name);
 void calculate_checksum(struct header_tar *header);
 void add_padding(gzFile archive, int size);
-void write_header(gzFile archive, const char *filename);
+void write_header(gzFile archive, const char *filename, int is_directory);
+void create_parent_directories(const char *path);
 
 #endif

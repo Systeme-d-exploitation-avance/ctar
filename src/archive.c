@@ -118,7 +118,7 @@ void archive_file(gzFile archive, const char* filepath)
     FILE* input_file = fopen(filepath, "rb");
     check_file_open_error(input_file, filepath);
 
-    write_header(archive, filepath);
+    write_header(archive, filepath, 0);
 
     int read_size;
     char buffer[BLOCK_SIZE];
@@ -144,6 +144,7 @@ void archive_directory(gzFile archive, const char* dirpath)
 
     struct dirent* entry;
     char entry_path[PATH_MAX];
+    write_header(archive, dirpath, 1);
 
     while ((entry = readdir(dir)) != NULL)
     {

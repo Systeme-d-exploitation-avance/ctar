@@ -82,19 +82,25 @@ void add_padding(gzFile archive, int size)
 }
 
 // Function to create and write the header to the archive
-void write_header(gzFile archive, const char *filename)
+void write_header(gzFile archive, const char *filename, int is_directory)
 {
     struct header_tar file_header;
     memset(&file_header, 0, sizeof(struct header_tar));
 
     strncpy(file_header.name, filename, sizeof(file_header.name));
-    sprintf(file_header.mode, "%07o", 0644);
-    sprintf(file_header.uid, "%07o", 0);
-    sprintf(file_header.gid, "%07o", 0);
-    sprintf(file_header.size, "%011o", get_file_size(filename));
+
+    if (is_directory) {
+        file_header.typeflag = '5'; // '5' for directories
+    } else {
+        sprintf(file_header.mode, "%07o", 0644);
+        sprintf(file_header.uid, "%07o", 0);
+        sprintf(file_header.gid, "%07o", 0);
+        sprintf(file_header.size, "%011o", get_file_size(filename));
+        file_header.typeflag = '0'; // '0' for regular files
+    }
+
     sprintf(file_header.mtime, "%011o", (unsigned int)time(NULL));
     memset(file_header.checksum, ' ', sizeof(file_header.checksum));
-    file_header.typeflag = '0';
     strcpy(file_header.magic, "ustar ");
     strcpy(file_header.version, "00");
     file_header.linkname[0] = '\0';
@@ -108,4 +114,29 @@ void write_header(gzFile archive, const char *filename)
     calculate_checksum(&file_header);
 
     gzwrite(archive, &file_header, sizeof(file_header));
+}
+
+void create_parent_directories(const char *path)
+{
+    char *parent = strdup(path);
+    char *parentDir = dirname(parent);
+
+    // Recursively create parent directories
+    char *token = strtok(parentDir, "/");
+    char currentDir[PATH_MAX];
+    currentDir[0] = '\0';
+
+    while (token != NULL)
+    {
+        strcat(currentDir, token);
+        if (mkdir(currentDir, 0777) != 0 && errno != EEXIST)
+        {
+            handle_error("Erreur lors de la création des répertoires parents");
+        }
+
+        strcat(currentDir, "/");
+        token = strtok(NULL, "/");
+    }
+
+    free(parent);
 }
