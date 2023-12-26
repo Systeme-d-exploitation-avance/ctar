@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <dirent.h>
 
 int create_directory(const char *path);
 int get_file_size(const char *file_path);

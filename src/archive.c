@@ -113,40 +113,90 @@ void extract_archive(const char *archivePath, const char *outputDir)
     gzclose(archive);
 }
 
-void create_archive(const char *output_archive, const char *input_files[], int num_files)
+void archive_file(gzFile archive, const char* filepath)
+{
+    FILE* input_file = fopen(filepath, "rb");
+    check_file_open_error(input_file, filepath);
+
+    write_header(archive, filepath);
+
+    int read_size;
+    char buffer[BLOCK_SIZE];
+
+    while ((read_size = fread(buffer, 1, sizeof(buffer), input_file)) > 0)
+    {
+        gzwrite(archive, buffer, read_size);
+    }
+
+    fclose(input_file);
+
+    int padding_size = BLOCK_SIZE - (get_file_size(filepath) % BLOCK_SIZE);
+    if (padding_size < BLOCK_SIZE)
+    {
+        add_padding(archive, padding_size);
+    }
+}
+
+void archive_directory(gzFile archive, const char* dirpath)
+{
+    DIR* dir = opendir(dirpath);
+    check_file_open_error(dir, dirpath);
+
+    struct dirent* entry;
+    char entry_path[PATH_MAX];
+
+    while ((entry = readdir(dir)) != NULL)
+    {
+        if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0)
+        {
+            snprintf(entry_path, sizeof(entry_path), "%s/%s", dirpath, entry->d_name);
+
+            struct stat st;
+            if (stat(entry_path, &st) == 0)
+            {
+                if (S_ISREG(st.st_mode))
+                {
+                    archive_file(archive, entry_path);
+                }
+                else if (S_ISDIR(st.st_mode))
+                {
+                    archive_directory(archive, entry_path);
+                }
+                // You can add more conditions to handle other file types if needed
+            }
+        }
+    }
+
+    closedir(dir);
+}
+
+void create_archive(const char* output_archive, const char* input_files[], int num_files)
 {
     gzFile archive = gzopen(output_archive, "wb");
     check_file_open_error(archive, output_archive);
 
-    // Loop through each file to add to the archive
+    char buffer[BLOCK_SIZE];
+
     for (int i = 0; i < num_files; ++i)
     {
-        FILE *input_file = fopen(input_files[i], "rb");
-        check_file_open_error(input_file, input_files[i]);
-        
-        write_header(archive, input_files[i]);
-
-        // Read and write the file content
-        int read_size;
-        while ((read_size = fread(buffer, 1, sizeof(buffer), input_file)) > 0)
+        struct stat st;
+        if (stat(input_files[i], &st) == 0)
         {
-            gzwrite(archive, buffer, read_size);
-        }
-
-        fclose(input_file);
-
-        // Add padding if necessary
-        int padding_size = BLOCK_SIZE - (get_file_size(input_files[i]) % BLOCK_SIZE);
-        if (padding_size < BLOCK_SIZE)
-        {
-            add_padding(archive, padding_size);
+            if (S_ISREG(st.st_mode))
+            {
+                archive_file(archive, input_files[i]);
+            }
+            else if (S_ISDIR(st.st_mode))
+            {
+                archive_directory(archive, input_files[i]);
+            }
+            // You can add more conditions to handle other file types if needed
         }
     }
 
-    // Add 512-byte blocks filled with binary zeros to mark the end of the archive
     memset(buffer, 0, sizeof(buffer));
-    add_padding(archive, BLOCK_SIZE); // Add an additional padding block
-    add_padding(archive, BLOCK_SIZE); // Add the second padding block to mark the end
+    add_padding(archive, BLOCK_SIZE);
+    add_padding(archive, BLOCK_SIZE);
 
     gzclose(archive);
 }
