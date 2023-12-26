@@ -96,7 +96,7 @@ void extract_archive(const char *archivePath, const char *outputDir)
         snprintf(outputPath, sizeof(outputPath), "%s/%s", outputDir, fileHeader->name);
 
         // Extract the file or create the directory
-        if (fileHeader->name[strlen(fileHeader->name) - 1] == '/')
+        if (fileHeader->typeflag == '5')
         {
             if (!create_directory(outputPath))
             {
