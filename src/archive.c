@@ -134,17 +134,21 @@ void extract_archive(const char *archive_path, const char *output_dir)
     gzclose(archive);
 }
 
-int get_file_size(const char *file_path) {
+int get_file_size(const char *file_path)
+{
     struct stat st;
-    if (stat(file_path, &st) == 0) {
+    if (stat(file_path, &st) == 0)
+    {
         return st.st_size;
     }
-    return -1;  // Erreur
+    return -1; // Erreur
 }
 
-void create_archive(const char *output_archive, const char *input_files[], int num_files) {
+void create_archive(const char *output_archive, const char *input_files[], int num_files)
+{
     gzFile archive = gzopen(output_archive, "wb");
-    if (archive == NULL) {
+    if (archive == NULL)
+    {
         perror("Erreur lors de la création de l'archive");
         exit(EXIT_FAILURE);
     }
@@ -152,28 +156,42 @@ void create_archive(const char *output_archive, const char *input_files[], int n
     char buffer[BLOCK_SIZE];
 
     // Boucle pour chaque fichier à ajouter à l'archive
-    for (int i = 0; i < num_files; ++i) {
+    for (int i = 0; i < num_files; ++i)
+    {
         FILE *input_file = fopen(input_files[i], "rb");
-        if (input_file == NULL) {
+        if (input_file == NULL)
+        {
             perror("Erreur lors de l'ouverture du fichier à ajouter à l'archive");
             exit(EXIT_FAILURE);
         }
 
         // Créer l'entête du fichier
         struct header_tar file_header;
+        memset(&file_header, 0, sizeof(struct header_tar)); // Initialize the header with zeros
+
+        // Set the fields in the header
         strncpy(file_header.name, input_files[i], sizeof(file_header.name));
-        sprintf(file_header.mode, "%07o", 0644);  // Mode par défaut pour les fichiers
-        sprintf(file_header.uid, "%07o", 0);      // UID par défaut
-        sprintf(file_header.gid, "%07o", 0);      // GID par défaut
+        sprintf(file_header.mode, "%07o", 0644); // Mode par défaut pour les fichiers
+        sprintf(file_header.uid, "%07o", 0);     // UID par défaut
+        sprintf(file_header.gid, "%07o", 0);     // GID par défaut
         sprintf(file_header.size, "%011o", get_file_size(input_files[i]));
-        sprintf(file_header.mtime, "%011o", time(NULL));
+        sprintf(file_header.mtime, "%011o", (unsigned int)time(NULL));
         memset(file_header.checksum, ' ', sizeof(file_header.checksum));
-        file_header.typeflag = '0';  // Typeflag '0' pour les fichiers normaux
-        // A TERMINER (d'autres champs de l'entête)
+        file_header.typeflag = '0'; // Typeflag '0' pour les fichiers normaux
+        strcpy(file_header.magic, "ustar ");
+        strcpy(file_header.version, "00");
+        file_header.linkname[0] = '\0';
+        file_header.uname[0] = '\0';
+        file_header.gname[0] = '\0';
+        file_header.devmajor[0] = '\0';
+        file_header.devminor[0] = '\0';
+        file_header.prefix[0] = '\0';
+        file_header.padding[0] = '\0';
 
         // Calculer et mettre à jour le checksum de l'entête
         unsigned int checksum = 0;
-        for (size_t j = 0; j < sizeof(file_header); ++j) {
+        for (size_t j = 0; j < sizeof(file_header); ++j)
+        {
             checksum += ((unsigned char *)&file_header)[j];
         }
         snprintf(file_header.checksum, sizeof(file_header.checksum), "%06o", checksum);
@@ -183,7 +201,8 @@ void create_archive(const char *output_archive, const char *input_files[], int n
 
         // Boucle de lecture et écriture du contenu du fichier
         int read_size;
-        while ((read_size = fread(buffer, 1, sizeof(buffer), input_file)) > 0) {
+        while ((read_size = fread(buffer, 1, sizeof(buffer), input_file)) > 0)
+        {
             gzwrite(archive, buffer, read_size);
         }
 
@@ -192,7 +211,8 @@ void create_archive(const char *output_archive, const char *input_files[], int n
 
         // Ajouter des blocs de remplissage si nécessaire
         int padding_size = BLOCK_SIZE - (get_file_size(input_files[i]) % BLOCK_SIZE);
-        if (padding_size < BLOCK_SIZE) {
+        if (padding_size < BLOCK_SIZE)
+        {
             memset(buffer, 0, padding_size);
             gzwrite(archive, buffer, padding_size);
         }
