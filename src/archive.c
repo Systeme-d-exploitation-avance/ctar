@@ -116,81 +116,37 @@ void extract_archive(const char *archivePath, const char *outputDir)
 void create_archive(const char *output_archive, const char *input_files[], int num_files)
 {
     gzFile archive = gzopen(output_archive, "wb");
-    if (archive == NULL)
-    {
-        perror("Erreur lors de la création de l'archive");
-        exit(EXIT_FAILURE);
-    }
+    check_file_open_error(archive, output_archive);
 
-    char buffer[BLOCK_SIZE];
-
-    // Boucle pour chaque fichier à ajouter à l'archive
+    // Loop through each file to add to the archive
     for (int i = 0; i < num_files; ++i)
     {
         FILE *input_file = fopen(input_files[i], "rb");
-        if (input_file == NULL)
-        {
-            perror("Erreur lors de l'ouverture du fichier à ajouter à l'archive");
-            exit(EXIT_FAILURE);
-        }
+        check_file_open_error(input_file, input_files[i]);
+        
+        write_header(archive, input_files[i]);
 
-        // Créer l'entête du fichier
-        struct header_tar file_header;
-        memset(&file_header, 0, sizeof(struct header_tar)); // Initialize the header with zeros
-
-        // Set the fields in the header
-        strncpy(file_header.name, input_files[i], sizeof(file_header.name));
-        sprintf(file_header.mode, "%07o", 0644); // Mode par défaut pour les fichiers
-        sprintf(file_header.uid, "%07o", 0);     // UID par défaut
-        sprintf(file_header.gid, "%07o", 0);     // GID par défaut
-        sprintf(file_header.size, "%011o", get_file_size(input_files[i]));
-        sprintf(file_header.mtime, "%011o", (unsigned int)time(NULL));
-        memset(file_header.checksum, ' ', sizeof(file_header.checksum));
-        file_header.typeflag = '0'; // Typeflag '0' pour les fichiers normaux
-        strcpy(file_header.magic, "ustar ");
-        strcpy(file_header.version, "00");
-        file_header.linkname[0] = '\0';
-        file_header.uname[0] = '\0';
-        file_header.gname[0] = '\0';
-        file_header.devmajor[0] = '\0';
-        file_header.devminor[0] = '\0';
-        file_header.prefix[0] = '\0';
-        file_header.padding[0] = '\0';
-
-        // Calculer et mettre à jour le checksum de l'entête
-        unsigned int checksum = 0;
-        for (size_t j = 0; j < sizeof(file_header); ++j)
-        {
-            checksum += ((unsigned char *)&file_header)[j];
-        }
-        snprintf(file_header.checksum, sizeof(file_header.checksum), "%06o", checksum);
-
-        // Écrire l'entête dans l'archive
-        gzwrite(archive, &file_header, sizeof(file_header));
-
-        // Boucle de lecture et écriture du contenu du fichier
+        // Read and write the file content
         int read_size;
         while ((read_size = fread(buffer, 1, sizeof(buffer), input_file)) > 0)
         {
             gzwrite(archive, buffer, read_size);
         }
 
-        // Fermer le fichier d'entrée
         fclose(input_file);
 
-        // Ajouter des blocs de remplissage si nécessaire
+        // Add padding if necessary
         int padding_size = BLOCK_SIZE - (get_file_size(input_files[i]) % BLOCK_SIZE);
         if (padding_size < BLOCK_SIZE)
         {
-            memset(buffer, 0, padding_size);
-            gzwrite(archive, buffer, padding_size);
+            add_padding(archive, padding_size);
         }
     }
 
-    // Ajouter les blocs de 512 octets remplis de blanc binaire pour marquer la fin de l'archive
+    // Add 512-byte blocks filled with binary zeros to mark the end of the archive
     memset(buffer, 0, sizeof(buffer));
-    gzwrite(archive, buffer, BLOCK_SIZE); // Ajout d'un bloc de remplissage supplémentaire
-    gzwrite(archive, buffer, BLOCK_SIZE); // Ajout du deuxième bloc de remplissage pour marquer la fin
+    add_padding(archive, BLOCK_SIZE); // Add an additional padding block
+    add_padding(archive, BLOCK_SIZE); // Add the second padding block to mark the end
 
     gzclose(archive);
 }
