@@ -12,8 +12,6 @@ void create_archive(const char *output_archive, const char *input_files[], int n
 
 int octal_to_int(const char *octal_str);
 int create_directory(const char *path);
-size_t filesize(const char *filename);
-
 int get_file_size(const char *file_path);
 
 #endif

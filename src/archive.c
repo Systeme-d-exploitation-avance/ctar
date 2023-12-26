@@ -3,8 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "archive.h"
-#include "typedef.h"
+#include "../include/archive.h"
 #include <errno.h>
 #include <zlib.h>
 #include <sys/stat.h>
@@ -43,7 +42,6 @@ void list_files(const char *archive_path)
     gzclose(archive);
 }
 
-// Fonction pour créer un dossier
 int create_directory(const char *path)
 {
     if (mkdir(path, 0777) != 0 && errno != EEXIST)
@@ -224,17 +222,6 @@ void create_archive(const char *output_archive, const char *input_files[], int n
     gzwrite(archive, buffer, BLOCK_SIZE); // Ajout du deuxième bloc de remplissage pour marquer la fin
 
     gzclose(archive);
-}
-
-size_t filesize(const char *filename)
-{
-    struct stat st;
-    if (stat(filename, &st) != 0)
-    {
-        perror("Erreur lors de la récupération de la taille du fichier");
-        exit(EXIT_FAILURE);
-    }
-    return (size_t)st.st_size;
 }
 
 int octal_to_int(const char *octal_str)
