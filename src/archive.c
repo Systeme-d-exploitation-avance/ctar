@@ -1,14 +1,11 @@
 // archive.c
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include "../include/archive.h"
-#include <errno.h>
-#include <zlib.h>
-#include <sys/stat.h>
+#include "../include/typedef.h"
+#include "../include/utils.h"
 
 char buffer[BLOCK_SIZE];
+
 
 void list_files(const char *archive_path)
 {
@@ -42,15 +39,6 @@ void list_files(const char *archive_path)
     gzclose(archive);
 }
 
-int create_directory(const char *path)
-{
-    if (mkdir(path, 0777) != 0 && errno != EEXIST)
-    {
-        perror("Erreur lors de la création du répertoire extrait");
-        return 0; // Échec
-    }
-    return 1; // Succès
-}
 
 void extract_archive(const char *archive_path, const char *output_dir)
 {
@@ -132,15 +120,6 @@ void extract_archive(const char *archive_path, const char *output_dir)
     gzclose(archive);
 }
 
-int get_file_size(const char *file_path)
-{
-    struct stat st;
-    if (stat(file_path, &st) == 0)
-    {
-        return st.st_size;
-    }
-    return -1; // Erreur
-}
 
 void create_archive(const char *output_archive, const char *input_files[], int num_files)
 {
@@ -224,7 +203,3 @@ void create_archive(const char *output_archive, const char *input_files[], int n
     gzclose(archive);
 }
 
-int octal_to_int(const char *octal_str)
-{
-    return strtol(octal_str, NULL, 8);
-}

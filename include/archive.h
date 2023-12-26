@@ -2,8 +2,6 @@
 
 #ifndef ARCHIVE_H
 #define ARCHIVE_H
-#include <zlib.h>
-#include "typedef.h"
 
 // Déclaration des fonctions
 void list_files(const char *archive_path);
