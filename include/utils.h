@@ -11,11 +11,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 
 int create_directory(const char *path);
 int get_file_size(const char *file_path);
 int octal_to_int(const char *octal_str);
-void checkFileOpenError(gzFile file, const char *filePath);
-int isEndOfArchive(struct header_tar *fileHeader);
+void check_file_open_error(gzFile file, const char *filePath);
+void handle_error(const char *message);
+gzFile open_archive(const char *archive_path);
+bool is_end_of_archive(const char *name);
 
 #endif

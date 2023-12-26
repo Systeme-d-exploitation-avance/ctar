@@ -27,7 +27,7 @@ int octal_to_int(const char *octal_str)
     return strtol(octal_str, NULL, 8);
 }
 
-void checkFileOpenError(gzFile file, const char *filePath)
+void check_file_open_error(gzFile file, const char *filePath)
 {
     if (file == NULL)
     {
@@ -38,7 +38,26 @@ void checkFileOpenError(gzFile file, const char *filePath)
     }
 }
 
-int isEndOfArchive(struct header_tar *fileHeader)
+// Function to handle errors and exit
+void handle_error(const char *message)
 {
-    return memcmp(fileHeader->name, "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0", 20) == 0;
+    perror(message);
+    exit(EXIT_FAILURE);
+}
+
+// Function to open a gzip archive
+gzFile open_archive(const char *archive_path)
+{
+    gzFile archive = gzopen(archive_path, "rb");
+    if (archive == NULL)
+    {
+        handle_error("Erreur lors de l'ouverture de l'archive");
+    }
+    return archive;
+}
+
+bool is_end_of_archive(const char *name)
+{
+    // Check if the name field is filled with zeros
+    return memcmp(name, "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0", 20) == 0;
 }

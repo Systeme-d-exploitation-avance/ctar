@@ -1,22 +1,25 @@
 // archive.c
 
 #include "../include/archive.h"
-#include "../include/utils.h"
 
 char buffer[BLOCK_SIZE];
 
+// Function to list the files in the archive
 void list_files(const char *archivePath)
 {
+    // Open the archive
     gzFile archive = gzopen(archivePath, "rb");
-    checkFileOpenError(archive, archivePath);
+    check_file_open_error(archive, archivePath);
 
     char buffer[BLOCK_SIZE];
 
+    // Read the archive header by header
     while (gzread(archive, buffer, BLOCK_SIZE) > 0)
     {
+        // Get the header from the buffer
         struct header_tar *fileHeader = (struct header_tar *)buffer;
 
-        if (isEndOfArchive(fileHeader))
+        if (is_end_of_archive(fileHeader->name))
         {
             break; // End of the archive
         }
@@ -31,80 +34,79 @@ void list_files(const char *archivePath)
     gzclose(archive);
 }
 
-void extract_archive(const char *archive_path, const char *output_dir)
+// Function to extract a file from the archive
+void extract_file(gzFile archive, const char *outputPath, int fileSize)
 {
-    gzFile archive = gzopen(archive_path, "rb");
-    if (archive == NULL)
+    // Open the output file
+    FILE *outputFile = fopen(outputPath, "wb");
+    if (outputFile == NULL)
     {
-        perror("Erreur lors de l'ouverture de l'archive");
-        exit(EXIT_FAILURE);
+        handle_error("Erreur lors de la création du fichier extrait");
     }
 
-    char buffer[BLOCK_SIZE];
-
-    // Vérifier si le répertoire de sortie existe
-    if (!create_directory(output_dir))
+    // Read the file content from the archive and write it to the output file
+    while (fileSize > 0)
     {
-        fprintf(stderr, "Erreur lors de la création du répertoire de sortie");
-        exit(EXIT_FAILURE);
-    }
-
-    // Boucle de lecture des entêtes des fichiers dans l'archive
-    while (gzread(archive, buffer, BLOCK_SIZE) > 0)
-    {
-        struct header_tar *file_header = (struct header_tar *)buffer;
-
-        // Vérifier si l'entête est un bloc rempli de zéros, indiquant la fin de l'archive
-        if (memcmp(file_header->name, "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0", 20) == 0)
+        // Read the file content from the archive
+        int readSize = gzread(archive, buffer, sizeof(buffer));
+        if (readSize <= 0)
         {
-            break; // Fin de l'archive
+            handle_error("Erreur lors de la lecture du fichier compressé");
         }
 
-        // Extrait le fichier
-        char output_path[PATH_MAX];
-        snprintf(output_path, sizeof(output_path), "%s/%s", output_dir, file_header->name);
-
-        if (file_header->name[strlen(file_header->name) - 1] == '/')
+        int writeSize = fwrite(buffer, 1, readSize, outputFile);
+        if (writeSize != readSize)
         {
-            // Le fichier est un répertoire, crée-le s'il n'existe pas
-            if (!create_directory(output_path))
+            handle_error("Erreur lors de l'écriture du fichier extrait");
+        }
+
+        fileSize -= readSize;
+    }
+
+    fclose(outputFile);
+}
+
+// Function to extract the archive
+void extract_archive(const char *archivePath, const char *outputDir)
+{
+    // Open the archive
+    gzFile archive = open_archive(archivePath);
+
+    // Create the output directory
+    if (!create_directory(outputDir))
+    {
+        handle_error("Erreur lors de la création du répertoire de sortie");
+    }
+
+    // Read the archive header by header
+    while (gzread(archive, buffer, BLOCK_SIZE) > 0)
+    {
+        // Get the header from the buffer
+        struct header_tar *fileHeader = (struct header_tar *)buffer;
+
+        // Check if it's the end of the archive
+        if (is_end_of_archive(fileHeader->name))
+        {
+            break; // End of the archive
+        }
+
+        // Get the file size from the header
+        char outputPath[PATH_MAX];
+        // Create the output path
+        snprintf(outputPath, sizeof(outputPath), "%s/%s", outputDir, fileHeader->name);
+
+        // Extract the file or create the directory
+        if (fileHeader->name[strlen(fileHeader->name) - 1] == '/')
+        {
+            if (!create_directory(outputPath))
             {
-                fprintf(stderr, "Erreur lors de la création du répertoire extrait");
-                exit(EXIT_FAILURE);
+                handle_error("Erreur lors de la création du répertoire extrait");
             }
         }
         else
         {
-            // Le fichier est un fichier normal, crée-le
-            FILE *output_file = fopen(output_path, "wb");
-            if (output_file == NULL)
-            {
-                perror("Erreur lors de la création du fichier extrait");
-                exit(EXIT_FAILURE);
-            }
-
-            // Boucle de lecture et écriture du contenu du fichier
-            int remaining_size = octal_to_int(file_header->size);
-            while (remaining_size > 0)
-            {
-                int read_size = gzread(archive, buffer, sizeof(buffer));
-                if (read_size <= 0)
-                {
-                    perror("Erreur lors de la lecture du fichier compressé");
-                    exit(EXIT_FAILURE);
-                }
-
-                int write_size = fwrite(buffer, 1, read_size, output_file);
-                if (write_size != read_size)
-                {
-                    perror("Erreur lors de l'écriture du fichier extrait");
-                    exit(EXIT_FAILURE);
-                }
-
-                remaining_size -= read_size;
-            }
-
-            fclose(output_file);
+            int remainingSize = octal_to_int(fileHeader->size);
+            extract_file(archive, outputPath, remainingSize);
         }
     }
 
