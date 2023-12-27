@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
             }
             else if (opt == 'x')
             {
-                extract_archive(archive_path, output_directory);
+                extract_archive_tar(archive_path, output_directory);
             }
             break;
 

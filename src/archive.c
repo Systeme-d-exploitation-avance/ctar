@@ -4,6 +4,7 @@
 
 char buffer[BLOCK_SIZE];
 
+// FM01 - Listage des fichiers de l'archive (tar et gz)
 // Function to list the files in the archive
 void list_files(const char *archivePath)
 {
@@ -35,7 +36,89 @@ void list_files(const char *archivePath)
 }
 
 // Function to extract a file from the archive
-void extract_file(gzFile archive, const char *outputPath, int fileSize)
+void extract_file_tar(FILE *archive, const char *outputPath, int fileSize)
+{
+    // Open the output file
+    FILE *outputFile = fopen(outputPath, "wb");
+    if (outputFile == NULL)
+    {
+        handle_error("Error creating the extracted file");
+    }
+
+    // Read the file content from the archive and write it to the output file
+    while (fileSize > 0)
+    {
+        // Read the file content from the archive
+        int readSize = fread(buffer, 1, sizeof(buffer), archive);
+        if (readSize <= 0)
+        {
+            handle_error("Error reading the compressed file");
+        }
+
+        int writeSize = fwrite(buffer, 1, readSize, outputFile);
+        if (writeSize != readSize)
+        {
+            handle_error("Error writing the extracted file");
+        }
+
+        fileSize -= readSize;
+    }
+
+    fclose(outputFile);
+}
+
+// Function to extract the archive
+void extract_archive_tar(const char *archivePath, const char *outputDir)
+{
+    // Open the archive
+    FILE *archive = fopen(archivePath, "rb");
+    check_file_open_error(archive, archivePath);
+
+    // Create the output directory
+    if (!create_directory(outputDir))
+    {
+        handle_error("Error creating the output directory");
+    }
+
+    // Read the archive header by header
+    while (fread(buffer, 1, BLOCK_SIZE, archive) > 0)
+    {
+        // Get the header from the buffer
+        struct header_tar *fileHeader = (struct header_tar *)buffer;
+
+        // Check if it's the end of the archive
+        if (is_end_of_archive(fileHeader->name))
+        {
+            break; // End of the archive
+        }
+
+        // Get the file size from the header
+        char outputPath[PATH_MAX];
+        // Create the output path
+        snprintf(outputPath, sizeof(outputPath), "%s/%s", outputDir, fileHeader->name);
+
+        // Extract the file or create the directory
+        if (fileHeader->typeflag == '5')
+        {
+            create_parent_directories(outputPath);
+            if (!create_directory(outputPath))
+            {
+                handle_error("Error creating the extracted directory");
+            }
+        }
+        else
+        {
+            int remainingSize = octal_to_int(fileHeader->size);
+            extract_file_tar(archive, outputPath, remainingSize);
+        }
+    }
+
+    fclose(archive);
+}
+
+// FM02 - Extraction de l'archive (tar et gz)
+// Function to extract a file from the archive
+void extract_file_tar_gz(gzFile archive, const char *outputPath, int fileSize)
 {
     // Open the output file
     FILE *outputFile = fopen(outputPath, "wb");
@@ -66,8 +149,9 @@ void extract_file(gzFile archive, const char *outputPath, int fileSize)
     fclose(outputFile);
 }
 
+// FM02 - Extraction de l'archive (tar et gz)
 // Function to extract the archive
-void extract_archive(const char *archivePath, const char *outputDir)
+void extract_archive_tar_gz(const char *archivePath, const char *outputDir)
 {
     // Open the archive
     gzFile archive = open_archive(archivePath);
@@ -106,16 +190,16 @@ void extract_archive(const char *archivePath, const char *outputDir)
         else
         {
             int remainingSize = octal_to_int(fileHeader->size);
-            extract_file(archive, outputPath, remainingSize);
+            extract_file_tar_gz(archive, outputPath, remainingSize);
         }
     }
 
     gzclose(archive);
 }
 
-void archive_file(gzFile archive, const char* filepath)
+void archive_file(gzFile archive, const char *filepath)
 {
-    FILE* input_file = fopen(filepath, "rb");
+    FILE *input_file = fopen(filepath, "rb");
     check_file_open_error(input_file, filepath);
 
     write_header(archive, filepath, 0);
@@ -137,12 +221,12 @@ void archive_file(gzFile archive, const char* filepath)
     }
 }
 
-void archive_directory(gzFile archive, const char* dirpath)
+void archive_directory(gzFile archive, const char *dirpath)
 {
-    DIR* dir = opendir(dirpath);
+    DIR *dir = opendir(dirpath);
     check_file_open_error(dir, dirpath);
 
-    struct dirent* entry;
+    struct dirent *entry;
     char entry_path[PATH_MAX];
     write_header(archive, dirpath, 1);
 
@@ -171,7 +255,7 @@ void archive_directory(gzFile archive, const char* dirpath)
     closedir(dir);
 }
 
-void create_archive(const char* output_archive, const char* input_files[], int num_files)
+void create_archive(const char *output_archive, const char *input_files[], int num_files)
 {
     gzFile archive = gzopen(output_archive, "wb");
     check_file_open_error(archive, output_archive);
