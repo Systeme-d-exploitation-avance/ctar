@@ -324,16 +324,14 @@ void compress_tar_to_gz(const char *input_tar, const char *output_tar_gz)
     FILE *input_file = fopen(input_tar, "rb");
     if (!input_file)
     {
-        perror("Error opening input tar file");
-        exit(EXIT_FAILURE);
+        handle_error("Error opening input tar file");
     }
 
     gzFile output_gz = gzopen(output_tar_gz, "wb");
     if (!output_gz)
     {
-        perror("Error opening output tar.gz file");
         fclose(input_file);
-        exit(EXIT_FAILURE);
+        handle_error("Error opening output tar.gz file");
     }
 
     unsigned char in[CHUNK_SIZE];
@@ -343,10 +341,9 @@ void compress_tar_to_gz(const char *input_tar, const char *output_tar_gz)
     {
         if (gzwrite(output_gz, in, (unsigned)read_size) == 0)
         {
-            perror("Error writing to output tar.gz file");
             fclose(input_file);
             gzclose(output_gz);
-            exit(EXIT_FAILURE);
+            handle_error("Error writing compressed file");
         }
     }
 

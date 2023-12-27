@@ -31,10 +31,8 @@ void check_file_open_error(void *file, const char *filePath)
 {
     if (file == NULL)
     {
-        perror("Erreur lors de l'ouverture de l'archive");
-        fprintf(stderr, "errno = %d\n", errno);
-        fprintf(stderr, "Chemin d'accès au fichier : %s\n", filePath);
-        exit(EXIT_FAILURE);
+        handle_error("Erreur lors de l'ouverture du fichier");
+        printf("Fichier : %s\n", filePath);
     }
 }
 
