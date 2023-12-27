@@ -116,6 +116,45 @@ void write_header(gzFile archive, const char *filename, int is_directory)
     gzwrite(archive, &file_header, sizeof(file_header));
 }
 
+void add_padding_tar(FILE *archive, int size) {
+    char buffer[BLOCK_SIZE];
+    memset(buffer, 0, size);
+    fwrite(buffer, 1, size, archive);
+}
+
+void write_header_tar(FILE *archive, const char *filename, int is_directory) {
+    struct header_tar file_header;
+    memset(&file_header, 0, sizeof(struct header_tar));
+
+    strncpy(file_header.name, filename, sizeof(file_header.name));
+
+    if (is_directory) {
+        file_header.typeflag = '5'; // '5' for directories
+    } else {
+        sprintf(file_header.mode, "%07o", 0644);
+        sprintf(file_header.uid, "%07o", 0);
+        sprintf(file_header.gid, "%07o", 0);
+        sprintf(file_header.size, "%011o", get_file_size(filename));
+        file_header.typeflag = '0'; // '0' for regular files
+    }
+
+    sprintf(file_header.mtime, "%011o", (unsigned int)time(NULL));
+    memset(file_header.checksum, ' ', sizeof(file_header.checksum));
+    strcpy(file_header.magic, "ustar ");
+    strcpy(file_header.version, "00");
+    file_header.linkname[0] = '\0';
+    file_header.uname[0] = '\0';
+    file_header.gname[0] = '\0';
+    file_header.devmajor[0] = '\0';
+    file_header.devminor[0] = '\0';
+    file_header.prefix[0] = '\0';
+    file_header.padding[0] = '\0';
+
+    calculate_checksum(&file_header);
+
+    fwrite(&file_header, 1, sizeof(file_header), archive);
+}
+
 void create_parent_directories(const char *path)
 {
     char *parent = strdup(path);

@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
             }
             else if (opt == 'x')
             {
-                extract_archive_tar(archive_path, output_directory);
+                extract_archive_tar_gz(archive_path, output_directory);
             }
             break;
 
@@ -74,7 +74,7 @@ int main(int argc, char *argv[])
             }
 
             // Appelle la fonction pour créer l'archive
-            create_archive(output_archive, input_files, num_files);
+            create_archive_tar_gz(output_archive, input_files, num_files);
             break;
 
         default:

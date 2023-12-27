@@ -26,7 +26,9 @@ gzFile open_archive(const char *archive_path);
 bool is_end_of_archive(const char *name);
 void calculate_checksum(struct header_tar *header);
 void add_padding(gzFile archive, int size);
+void add_padding_tar(FILE *archive, int size);
 void write_header(gzFile archive, const char *filename, int is_directory);
+void write_header_tar(FILE *archive, const char *filename, int is_directory);
 void create_parent_directories(const char *path);
 
 #endif
