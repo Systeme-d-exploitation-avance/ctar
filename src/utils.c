@@ -27,7 +27,7 @@ int octal_to_int(const char *octal_str)
     return strtol(octal_str, NULL, 8);
 }
 
-void check_file_open_error(void* file, const char *filePath)
+void check_file_open_error(void *file, const char *filePath)
 {
     if (file == NULL)
     {
@@ -89,9 +89,12 @@ void write_header_gz(gzFile archive, const char *filename, int is_directory)
 
     strncpy(file_header.name, filename, sizeof(file_header.name));
 
-    if (is_directory) {
+    if (is_directory)
+    {
         file_header.typeflag = '5'; // '5' for directories
-    } else {
+    }
+    else
+    {
         sprintf(file_header.mode, "%07o", 0644);
         sprintf(file_header.uid, "%07o", 0);
         sprintf(file_header.gid, "%07o", 0);
@@ -116,21 +119,26 @@ void write_header_gz(gzFile archive, const char *filename, int is_directory)
     gzwrite(archive, &file_header, sizeof(file_header));
 }
 
-void add_padding(FILE *archive, int size) {
+void add_padding(FILE *archive, int size)
+{
     char buffer[BLOCK_SIZE];
     memset(buffer, 0, size);
     fwrite(buffer, 1, size, archive);
 }
 
-void write_header(FILE *archive, const char *filename, int is_directory) {
+void write_header(FILE *archive, const char *filename, int is_directory)
+{
     struct header_tar file_header;
     memset(&file_header, 0, sizeof(struct header_tar));
 
     strncpy(file_header.name, filename, sizeof(file_header.name));
 
-    if (is_directory) {
+    if (is_directory)
+    {
         file_header.typeflag = '5'; // '5' for directories
-    } else {
+    }
+    else
+    {
         sprintf(file_header.mode, "%07o", 0644);
         sprintf(file_header.uid, "%07o", 0);
         sprintf(file_header.gid, "%07o", 0);
@@ -153,4 +161,11 @@ void write_header(FILE *archive, const char *filename, int is_directory) {
     calculate_checksum(&file_header);
 
     fwrite(&file_header, 1, sizeof(file_header), archive);
+}
+
+void skip_to_next_header(gzFile archive, size_t fileSize)
+{
+    // Calculate the number of blocks for the file content
+    size_t numBlocks = (fileSize + BLOCK_SIZE - 1) / BLOCK_SIZE;
+    gzseek(archive, numBlocks * BLOCK_SIZE, SEEK_CUR);
 }

@@ -29,5 +29,6 @@ void add_padding_gz(gzFile archive, int size);
 void add_padding(FILE *archive, int size);
 void write_header_gz(gzFile archive, const char *filename, int is_directory);
 void write_header(FILE *archive, const char *filename, int is_directory);
+void skip_to_next_header(gzFile archive, size_t fileSize);
 
 #endif
