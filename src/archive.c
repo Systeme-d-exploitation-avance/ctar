@@ -35,7 +35,8 @@ void list_files(const char *archivePath)
     gzclose(archive);
 }
 
-// Function to extract a file from the archive
+// FM02 - Extraction de l'archive (tar)
+// Function to extract a file from the archive (tar)
 void extract_file_tar(FILE *archive, const char *outputPath, int fileSize)
 {
     // Open the output file
@@ -67,7 +68,8 @@ void extract_file_tar(FILE *archive, const char *outputPath, int fileSize)
     fclose(outputFile);
 }
 
-// Function to extract the archive
+// FM02 - Extraction de l'archive (tar)
+// Function to extract the archive (tar)
 void extract_archive_tar(const char *archivePath, const char *outputDir)
 {
     // Open the archive
@@ -115,8 +117,8 @@ void extract_archive_tar(const char *archivePath, const char *outputDir)
     fclose(archive);
 }
 
-// FM02 - Extraction de l'archive (tar et gz)
-// Function to extract a file from the archive
+// FMO02 - Decompression de l'archive compresse (tar.gz)
+// Function to extract a file from the compressed archive (tar.gz)
 void extract_file_tar_gz(gzFile archive, const char *outputPath, int fileSize)
 {
     // Open the output file
@@ -148,8 +150,8 @@ void extract_file_tar_gz(gzFile archive, const char *outputPath, int fileSize)
     fclose(outputFile);
 }
 
-// FM02 - Extraction de l'archive (tar et gz)
-// Function to extract the archive
+// FMO02 - Decompression de l'archive compresse (tar.gz)
+// Function to extract the compressed archive (tar.gz)
 void extract_archive_tar_gz(const char *archivePath, const char *outputDir)
 {
     // Open the archive
