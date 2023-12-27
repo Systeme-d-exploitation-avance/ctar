@@ -1,0 +1,24 @@
+# Doxyfile
+
+# Project information
+PROJECT_NAME           = "MyProject"
+PROJECT_BRIEF          = "Brief description of MyProject"
+
+# Input files
+INPUT                  = ../include ../src
+RECURSIVE              = YES
+FILE_PATTERNS          = *.c *.cpp *.h 
+
+# Output directory
+OUTPUT_DIRECTORY       = ./docs
+
+# Use Doxygen built-in themes for HTML output
+HTML_OUTPUT            = html
+HTML_THEME             = default
+
+# Other settings
+GENERATE_LATEX         = NO
+GENERATE_HTML          = YES
+EXTRACT_ALL            = NO
+EXTRACT_PRIVATE        = NO
+EXTRACT_STATIC         = NO
