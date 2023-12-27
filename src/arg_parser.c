@@ -9,13 +9,13 @@ void print_help()
 {
     printf("Usage: program [OPTIONS] [ARCHIVE_FILE]\n");
     printf("Options:\n");
-    printf("  -l, --list ARCHIVE_FILE    List contents of the archive\n");
-    printf("  -e, --extract ARCHIVE_FILE Extract the archive\n");
-    printf("  -c, --create ARCHIVE_FILE  Create a new archive\n");
-    printf("  -d, --directory DIRECTORY_TO_PROCESS  Specify the directory to process (used with -c and -e)\n");
-    printf("  -z, --compress             Compress the archive (used with -c)\n");
-    printf("  -v, --verbose              Enable verbose mode\n");
-    printf("  -h, --help                 Display this help\n");
+    printf("  -l, --list        ARCHIVE_FILE            List contents of the archive\n");
+    printf("  -e, --extract     ARCHIVE_FILE            Extract the archive\n");
+    printf("  -c, --create      ARCHIVE_FILE            Create a new archive\n");
+    printf("  -d, --directory   DIRECTORY_TO_PROCESS    Specify the directory to process (used with -c and -e)\n");
+    printf("  -z, --compress                            Compress the archive (used with -c : exemple ./program -zc my.tar fileA)\n");
+    printf("  -v, --verbose                             Enable verbose mode\n");
+    printf("  -h, --help                                Display this help\n");
     exit(EXIT_SUCCESS);
 }
 
@@ -26,7 +26,7 @@ void parse_arguments(int argc, char *argv[])
         {"extract", required_argument, 0, 'e'},
         {"create", required_argument, 0, 'c'},
         {"directory", required_argument, 0, 'd'},
-        {"compress", required_argument, 0, 'z'},
+        {"compress", no_argument, 0, 'z'},
         {"verbose", no_argument, 0, 'v'},
         {"help", no_argument, 0, 'h'},
         {0, 0, 0, 0}};
@@ -36,8 +36,9 @@ void parse_arguments(int argc, char *argv[])
     char *output_archive = NULL;
     char *output_directory = ".";
     int verbose_mode = 0;
+    int compress_flag = 0;
 
-    while ((opt = getopt_long(argc, argv, "l:e:c:d:z:vh", long_options, NULL)) != -1)
+    while ((opt = getopt_long(argc, argv, "l:e:c:d:zvh", long_options, NULL)) != -1)
     {
         switch (opt)
         {
@@ -96,27 +97,23 @@ void parse_arguments(int argc, char *argv[])
             }
 
             create_archive(output_archive, input_files, num_files);
+
+            // Check if the '-z' flag is present
+            if (compress_flag)
+            {
+                size_t compressed_len = strlen(output_archive) + strlen(".gz") + 1; // +1 for null terminator
+                char *output_tar_gz = malloc(compressed_len);
+                snprintf(output_tar_gz, compressed_len, "%s.gz", output_archive);
+                printf("Compressing archive %s to %s.gz\n", output_archive, output_archive);
+                compress_tar_to_gz(output_archive, output_tar_gz);
+                remove(output_archive);
+            }
             break;
 
         case 'z':
-            if (optarg == NULL)
-            {
-                handle_error("Error: No archive name specified.");
-            }
-
-            archive_path = optarg;
-
-            if (optind < argc)
-            {
-                output_archive = argv[optind];
-                optind++;
-            }
-            else
-            {
-                handle_error("Error: No output archive name specified.");
-            }
-
-            compress_tar_to_gz(archive_path, output_archive);
+            // Set a flag indicating that compression is requested
+            printf("compress_flag set to 1\n");
+            compress_flag = 1;
             break;
 
         case 'd':
