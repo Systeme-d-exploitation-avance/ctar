@@ -203,7 +203,7 @@ void archive_file_tar(FILE *archive, const char *filepath) {
     FILE *input_file = fopen(filepath, "rb");
     check_file_open_error(input_file, filepath);
 
-    write_header_tar(archive, filepath, 0);
+    write_header(archive, filepath, 0);
 
     int read_size;
     char buffer[BLOCK_SIZE];
@@ -216,7 +216,7 @@ void archive_file_tar(FILE *archive, const char *filepath) {
 
     int padding_size = BLOCK_SIZE - (get_file_size(filepath) % BLOCK_SIZE);
     if (padding_size < BLOCK_SIZE) {
-        add_padding_tar(archive, padding_size);
+        add_padding(archive, padding_size);
     }
 }
 
@@ -227,7 +227,7 @@ void archive_directory_tar(FILE *archive, const char *dirpath) {
 
     struct dirent *entry;
     char entry_path[PATH_MAX];
-    write_header_tar(archive, dirpath, 1);
+    write_header(archive, dirpath, 1);
 
     while ((entry = readdir(dir)) != NULL) {
         if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0) {
@@ -268,10 +268,41 @@ void create_archive_tar(const char *output_archive, const char *input_files[], i
     }
 
     memset(buffer, 0, sizeof(buffer));
-    add_padding_tar(archive, BLOCK_SIZE);
-    add_padding_tar(archive, BLOCK_SIZE);
+    add_padding(archive, BLOCK_SIZE);
+    add_padding(archive, BLOCK_SIZE);
 
     fclose(archive);
+}
+
+// FMO01 - Prise en charge de la compression d’une archive tar
+void compress_tar_to_gz(const char *input_tar, const char *output_tar_gz) {
+    FILE *input_file = fopen(input_tar, "rb");
+    if (!input_file) {
+        perror("Error opening input tar file");
+        exit(EXIT_FAILURE);
+    }
+
+    gzFile output_gz = gzopen(output_tar_gz, "wb");
+    if (!output_gz) {
+        perror("Error opening output tar.gz file");
+        fclose(input_file);
+        exit(EXIT_FAILURE);
+    }
+
+    unsigned char in[CHUNK_SIZE];
+    int read_size;
+
+    while ((read_size = fread(in, 1, sizeof(in), input_file)) > 0) {
+        if (gzwrite(output_gz, in, (unsigned)read_size) == 0) {
+            perror("Error writing to output tar.gz file");
+            fclose(input_file);
+            gzclose(output_gz);
+            exit(EXIT_FAILURE);
+        }
+    }
+
+    fclose(input_file);
+    gzclose(output_gz);
 }
 
 // FMO01 - Creation d'une archive compresse (tar.gz)
@@ -280,7 +311,7 @@ void archive_file_tar_gz(gzFile archive, const char *filepath)
     FILE *input_file = fopen(filepath, "rb");
     check_file_open_error(input_file, filepath);
 
-    write_header(archive, filepath, 0);
+    write_header_gz(archive, filepath, 0);
 
     int read_size;
     char buffer[BLOCK_SIZE];
@@ -295,7 +326,7 @@ void archive_file_tar_gz(gzFile archive, const char *filepath)
     int padding_size = BLOCK_SIZE - (get_file_size(filepath) % BLOCK_SIZE);
     if (padding_size < BLOCK_SIZE)
     {
-        add_padding(archive, padding_size);
+        add_padding_gz(archive, padding_size);
     }
 }
 
@@ -307,7 +338,7 @@ void archive_directory_tar_gz(gzFile archive, const char *dirpath)
 
     struct dirent *entry;
     char entry_path[PATH_MAX];
-    write_header(archive, dirpath, 1);
+    write_header_gz(archive, dirpath, 1);
 
     while ((entry = readdir(dir)) != NULL)
     {
@@ -360,8 +391,8 @@ void create_archive_tar_gz(const char *output_archive, const char *input_files[]
     }
 
     memset(buffer, 0, sizeof(buffer));
-    add_padding(archive, BLOCK_SIZE);
-    add_padding(archive, BLOCK_SIZE);
+    add_padding_gz(archive, BLOCK_SIZE);
+    add_padding_gz(archive, BLOCK_SIZE);
 
     gzclose(archive);
 }

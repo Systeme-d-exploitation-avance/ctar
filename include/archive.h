@@ -3,6 +3,8 @@
 #ifndef ARCHIVE_H
 #define ARCHIVE_H
 
+#define CHUNK_SIZE 16384
+
 #include "utils.h"
 
 // FM01
@@ -22,9 +24,11 @@ void archive_directory_tar(FILE *archive, const char *dirpath);
 void create_archive_tar(const char *output_archive, const char *input_files[], int num_files);
 
 // FMO01
+void compress_tar_to_gz(const char *input_tar, const char *output_tar_gz);
+
+// MISC
 void archive_file_tar_gz(gzFile archive, const char* filepath);
 void archive_directory_tar_gz(gzFile archive, const char* dirpath);
 void create_archive_tar_gz(const char* output_archive, const char* input_files[], int num_files);
-
 
 #endif

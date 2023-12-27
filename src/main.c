@@ -1,5 +1,3 @@
-// main.c
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -7,13 +5,12 @@
 
 int main(int argc, char *argv[])
 {
-    // Récupération des paramètres de la ligne de commande
     int opt;
     char *archive_path = NULL;
     char *output_archive = NULL;
-    char *output_directory = "."; // Valeur par défaut pour l'extraction
+    char *output_directory = ".";
 
-    while ((opt = getopt(argc, argv, "lxc:")) != -1)
+    while ((opt = getopt(argc, argv, "lxc:z:")) != -1)
     {
         switch (opt)
         {
@@ -23,18 +20,17 @@ int main(int argc, char *argv[])
             // FM02 - Extraction de l'archive
             if (optind < argc)
             {
-                archive_path = argv[optind]; // Utilise le prochain argument comme chemin d'accès
-                optind++; // Incrémente l'indice pour l'option '-x' qui a un argument supplémentaire
+                archive_path = argv[optind];
+                optind++;
             }
             else
             {
-                fprintf(stderr, "Erreur: Aucun chemin d'accès spécifié.\n");
+                fprintf(stderr, "Error: No archive path specified.\n");
                 exit(EXIT_FAILURE);
             }
 
             if (opt == 'x' && optind < argc)
             {
-                // Si l'option est 'x' et un deuxième argument est spécifié, utilise-le comme répertoire de sortie
                 output_directory = argv[optind];
             }
 
@@ -74,7 +70,34 @@ int main(int argc, char *argv[])
             }
 
             // Appelle la fonction pour créer l'archive
-            create_archive_tar_gz(output_archive, input_files, num_files);
+            create_archive_tar(output_archive, input_files, num_files);
+            break;
+
+        case 'z':
+            if (optarg != NULL)
+            {
+                archive_path = optarg;
+                printf("archive_path: %s\n", archive_path);
+
+                if (optind < argc)
+                {
+                    output_archive = argv[optind];
+                    printf("output_archive: %s\n", output_archive);
+                    optind++; // Increment optind manually
+                }
+                else
+                {
+                    fprintf(stderr, "Error: No result archive path specified.\n");
+                    exit(EXIT_FAILURE);
+                }
+
+                compress_tar_to_gz(archive_path, output_archive);
+            }
+            else
+            {
+                fprintf(stderr, "Error: No source archive path specified.\n");
+                exit(EXIT_FAILURE);
+            }
             break;
 
         default:

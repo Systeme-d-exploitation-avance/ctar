@@ -74,7 +74,7 @@ void calculate_checksum(struct header_tar *header)
 }
 
 // Function to add padding to the archive
-void add_padding(gzFile archive, int size)
+void add_padding_gz(gzFile archive, int size)
 {
     char buffer[BLOCK_SIZE];
     memset(buffer, 0, size);
@@ -82,7 +82,7 @@ void add_padding(gzFile archive, int size)
 }
 
 // Function to create and write the header to the archive
-void write_header(gzFile archive, const char *filename, int is_directory)
+void write_header_gz(gzFile archive, const char *filename, int is_directory)
 {
     struct header_tar file_header;
     memset(&file_header, 0, sizeof(struct header_tar));
@@ -116,13 +116,13 @@ void write_header(gzFile archive, const char *filename, int is_directory)
     gzwrite(archive, &file_header, sizeof(file_header));
 }
 
-void add_padding_tar(FILE *archive, int size) {
+void add_padding(FILE *archive, int size) {
     char buffer[BLOCK_SIZE];
     memset(buffer, 0, size);
     fwrite(buffer, 1, size, archive);
 }
 
-void write_header_tar(FILE *archive, const char *filename, int is_directory) {
+void write_header(FILE *archive, const char *filename, int is_directory) {
     struct header_tar file_header;
     memset(&file_header, 0, sizeof(struct header_tar));
 
@@ -153,29 +153,4 @@ void write_header_tar(FILE *archive, const char *filename, int is_directory) {
     calculate_checksum(&file_header);
 
     fwrite(&file_header, 1, sizeof(file_header), archive);
-}
-
-void create_parent_directories(const char *path)
-{
-    char *parent = strdup(path);
-    char *parentDir = dirname(parent);
-
-    // Recursively create parent directories
-    char *token = strtok(parentDir, "/");
-    char currentDir[PATH_MAX];
-    currentDir[0] = '\0';
-
-    while (token != NULL)
-    {
-        strcat(currentDir, token);
-        if (mkdir(currentDir, 0777) != 0 && errno != EEXIST)
-        {
-            handle_error("Erreur lors de la création des répertoires parents");
-        }
-
-        strcat(currentDir, "/");
-        token = strtok(NULL, "/");
-    }
-
-    free(parent);
 }
