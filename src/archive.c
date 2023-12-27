@@ -31,6 +31,22 @@ void list_files(const char *archivePath) {
     gzclose(archive);
 }
 
+void extract_archive(const char *archivePath, const char *outputDir)
+{
+    // Check if the file has a ".gz" extension
+    size_t len = strlen(archivePath);
+    if (len >= 3 && strcmp(archivePath + len - 3, ".gz") == 0)
+    {
+        printf("Extracting a compressed archive\n");
+        extract_archive_tar_gz(archivePath, outputDir);
+    }
+    else
+    {
+        printf("Extracting a non-compressed archive\n");
+        extract_archive_tar(archivePath, outputDir);
+    }
+}
+
 // FM02 - Extraction de l'archive (tar)
 // Function to extract a file from the archive (tar)
 void extract_file_tar(FILE *archive, const char *outputPath, int fileSize)

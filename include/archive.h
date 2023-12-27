@@ -11,6 +11,7 @@
 void list_files(const char *archive_path);
 
 // FM02
+void extract_archive(const char *archivePath, const char *outputDir);
 void extract_file_tar(FILE *archive, const char *outputPath, int fileSize);
 void extract_archive_tar(const char *archivePath, const char *outputDir);
 
