@@ -210,6 +210,22 @@ void extract_archive_tar_gz(const char *archivePath, const char *outputDir)
     gzclose(archive);
 }
 
+void create_archive(const char *outputArchive, const char *inputFiles[], int numFiles)
+{
+    // Check if the file has a ".gz" extension
+    size_t len = strlen(outputArchive);
+    if (len >= 3 && strcmp(outputArchive + len - 3, ".gz") == 0)
+    {
+        printf("Creating a compressed archive\n");
+        create_archive_tar_gz(outputArchive, inputFiles, numFiles);
+    }
+    else
+    {
+        printf("Creating a non-compressed archive\n");
+        create_archive_tar(outputArchive, inputFiles, numFiles);
+    }
+}
+
 // FM03 - Creation d'une archive (tar)
 void archive_file_tar(FILE *archive, const char *filepath)
 {

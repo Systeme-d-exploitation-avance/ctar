@@ -34,11 +34,14 @@ void parse_arguments(int argc, char *argv[])
 
             if (opt == 'l')
             {
+                printf("Listing archive %s :\n", archive_path);
                 list_files(archive_path);
             }
             else if (opt == 'x')
             {
+                printf("Extracting archive %s to %s\n", archive_path, output_directory);
                 extract_archive(archive_path, output_directory);
+                printf("Done!\n");
             }
             break;
 
@@ -53,13 +56,13 @@ void parse_arguments(int argc, char *argv[])
             int num_files = argc - optind;
 
             printf("Archive Name: %s\n", output_archive);
-            printf("File List:\n");
+            printf("File/Folder to archive list:\n");
             for (int i = 0; i < num_files; ++i)
             {
                 printf("   %s\n", input_files[i]);
             }
 
-            create_archive_tar(output_archive, input_files, num_files);
+            create_archive(output_archive, input_files, num_files);
             break;
 
         case 'z':
