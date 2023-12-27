@@ -100,7 +100,6 @@ void extract_archive_tar(const char *archivePath, const char *outputDir)
         // Extract the file or create the directory
         if (fileHeader->typeflag == '5')
         {
-            create_parent_directories(outputPath);
             if (!create_directory(outputPath))
             {
                 handle_error("Error creating the extracted directory");
