@@ -68,9 +68,9 @@ int octal_to_int(const char *octal_str);
 void check_file_open_error(void* file, const char *filePath);
 
 /**
- * @brief Handles an error and exits.
+ * @brief Handles an error using errno codes and exits the program.
  * 
- * This function handles errors and exits. It takes the error message as a parameter.
+ * This function handles errors using errno codes and exits the program. It takes the error message as a parameter.
  * 
  * @param message The error message.
  * 

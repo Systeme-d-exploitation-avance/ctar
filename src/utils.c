@@ -41,10 +41,33 @@ void check_file_open_error(void *file, const char *filePath)
     }
 }
 
-// Function to handle errors and exit
+// Function to handle errors using errno codes and exit the program
 void handle_error(const char *message)
 {
     perror(message);
+
+    switch (errno)
+    {
+    case EEXIST:
+        fprintf(stderr, "Error: File already exists.\n");
+        break;
+    case EFAULT:
+        fprintf(stderr, "Error: Bad address.\n");
+        break;
+    case EISDIR:
+        fprintf(stderr, "Error: Is a directory.\n");
+        break;
+    case ENOTDIR:
+        fprintf(stderr, "Error: Not a directory.\n");
+        break;
+    case ELOOP:
+        fprintf(stderr, "Error: Too many levels of symbolic links.\n");
+        break;
+
+    default:
+        fprintf(stderr, "Unknown error.\n");
+    }
+
     exit(EXIT_FAILURE);
 }
 
