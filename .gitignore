@@ -1,0 +1,11 @@
+# exclude doxygen docs folders
+doc/docs/*
+
+# exclude the build folder
+build/*
+
+# exclude .vscode folder
+.vscode/*
+
+# exclude coverage content
+coverage/*

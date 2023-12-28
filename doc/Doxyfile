@@ -1,0 +1,24 @@
+# Doxyfile
+
+# Project information
+PROJECT_NAME           = "CTAR"
+PROJECT_BRIEF          = "The aim of this project is to implement - in a simplified form - a .tar archive generator/extractor similar to the eponymous tar command. The latter must be able to handle a .tar archive that complies with the GNU POSIX 1003.1-1988 "ustar" standard."
+
+# Input files
+INPUT                  = ../include ../src
+RECURSIVE              = YES
+FILE_PATTERNS          = *.c *.cpp *.h 
+
+# Output directory
+OUTPUT_DIRECTORY       = ./docs
+
+# Use Doxygen built-in themes for HTML output
+HTML_OUTPUT            = html
+HTML_THEME             = default
+
+# Other settings
+GENERATE_LATEX         = NO
+GENERATE_HTML          = YES
+EXTRACT_ALL            = NO
+EXTRACT_PRIVATE        = NO
+EXTRACT_STATIC         = NO
