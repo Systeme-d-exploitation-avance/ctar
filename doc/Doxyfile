@@ -10,7 +10,7 @@ RECURSIVE              = YES
 FILE_PATTERNS          = *.c *.cpp *.h 
 
 # Output directory
-OUTPUT_DIRECTORY       = ./docs
+OUTPUT_DIRECTORY       = ./doc/doxygen
 
 # Use Doxygen built-in themes for HTML output
 HTML_OUTPUT            = html
