@@ -5,6 +5,8 @@
 
 #include "../include/archive.h"
 
+char buffer[BLOCK_SIZE];
+
 // FM01 - Listage des fichiers de l'archive (tar et gz)
 // Function to list the files in the archive
 void list_files(const char *archivePath) {
