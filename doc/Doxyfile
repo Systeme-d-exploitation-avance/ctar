@@ -1,8 +1,8 @@
 # Doxyfile
 
 # Project information
-PROJECT_NAME           = "MyProject"
-PROJECT_BRIEF          = "Brief description of MyProject"
+PROJECT_NAME           = "CTAR"
+PROJECT_BRIEF          = "The aim of this project is to implement - in a simplified form - a .tar archive generator/extractor similar to the eponymous tar command. The latter must be able to handle a .tar archive that complies with the GNU POSIX 1003.1-1988 "ustar" standard."
 
 # Input files
 INPUT                  = ../include ../src

@@ -6,3 +6,6 @@ build/*
 
 # exclude .vscode folder
 .vscode/*
+
+# exclude coverage content
+coverage/*
