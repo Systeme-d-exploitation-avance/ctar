@@ -1,3 +1,6 @@
+/// \file
+/// \brief Parses the arguments passed to the program.
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -5,6 +8,7 @@
 #include "../include/archive.h"
 #include "../include/argParser.h"
 
+// Prints the help.
 void print_help()
 {
     printf("Usage: program [OPTIONS] [ARCHIVE_FILE]\n");
@@ -20,6 +24,7 @@ void print_help()
     exit(EXIT_SUCCESS);
 }
 
+// Parses the arguments passed to the program.
 void parse_arguments(int argc, char *argv[])
 {
     const struct option long_options[] = {

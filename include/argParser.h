@@ -17,4 +17,14 @@
 */
 void parse_arguments(int argc, char *argv[]);
 
+/**
+ * @brief Prints the help.
+ * 
+ * This function prints the help.
+ * 
+ * @return void
+ * 
+*/
+void print_help();
+
 #endif // ARG_PARSER_H

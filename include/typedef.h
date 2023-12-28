@@ -4,8 +4,17 @@
 #ifndef TYPEDEF_H
 #define TYPEDEF_H
 
+/**
+ * @brief Defines the size of a block.
+*/
 #define BLOCK_SIZE 512
 
+/**
+ * @brief Defines the type of the header of a tar file.
+ * 
+ * This structure defines the type of the header of a tar file.
+ * 
+*/
 struct header_tar {
     char name[100];         // Nom du fichier
     char mode[8];           // Permissions du fichier en octal

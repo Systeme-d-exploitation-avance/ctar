@@ -7,7 +7,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include "../include/archive.h"
 #include "../include/argParser.h"
 

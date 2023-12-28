@@ -6,7 +6,19 @@
 #ifndef ARCHIVE_H
 #define ARCHIVE_H
 
+/**
+ * @brief Defines the size of chunk.
+ * 
+ * This macro defines the size of a chunk of data. It is used for reading and writing data to and from files.
+*/
 #define CHUNK_SIZE 16384
+
+/**
+ * @brief Defines the size of a block.
+ * 
+ * This macro defines the size of a block.
+*/
+char buffer[BLOCK_SIZE];
 
 #include "utils.h"
 
@@ -22,8 +34,6 @@
  * @return void
  */
 void list_files(const char *archive_path);
-
-// FM02
 
 /**
  * @brief FM02 Extracts an archive (tar or gz).

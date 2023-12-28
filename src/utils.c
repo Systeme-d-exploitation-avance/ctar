@@ -1,17 +1,20 @@
-// utils.c
+/// \file
+/// \brief Utility functions
 
 #include "../include/utils.h"
 
+// Function to create a directory if it doesn't exist
 int create_directory(const char *path)
 {
     if (mkdir(path, 0777) != 0 && errno != EEXIST)
     {
         perror("Erreur lors de la création du répertoire extrait");
-        return 0; // Échec
+        return 0;
     }
-    return 1; // Succès
+    return 1;
 }
 
+// Function to get the size of a file
 int get_file_size(const char *file_path)
 {
     struct stat st;
@@ -19,14 +22,16 @@ int get_file_size(const char *file_path)
     {
         return st.st_size;
     }
-    return -1; // Erreur
+    return -1;
 }
 
+// Function to convert an octal string to an integer
 int octal_to_int(const char *octal_str)
 {
     return strtol(octal_str, NULL, 8);
 }
 
+// Function to check if a file is openned correctly and handle the error if not
 void check_file_open_error(void *file, const char *filePath)
 {
     if (file == NULL)
@@ -43,7 +48,7 @@ void handle_error(const char *message)
     exit(EXIT_FAILURE);
 }
 
-// Function to open a gzip archive
+// Function to open a gzip archive using zlib
 gzFile open_archive(const char *archive_path)
 {
     gzFile archive = gzopen(archive_path, "rb");
@@ -54,6 +59,7 @@ gzFile open_archive(const char *archive_path)
     return archive;
 }
 
+// Function to check if its the end of the archive
 bool is_end_of_archive(const char *name)
 {
     // Check if the name field is filled with zeros
@@ -71,7 +77,7 @@ void calculate_checksum(struct header_tar *header)
     snprintf(header->checksum, sizeof(header->checksum), "%06o", checksum);
 }
 
-// Function to add padding to the archive
+// Function to add padding to the gzip archive
 void add_padding_gz(gzFile archive, int size)
 {
     char buffer[BLOCK_SIZE];
@@ -79,7 +85,7 @@ void add_padding_gz(gzFile archive, int size)
     gzwrite(archive, buffer, size);
 }
 
-// Function to create and write the header to the archive
+// Function to create and write the header to the gzip archive
 void write_header_gz(gzFile archive, const char *filename, int is_directory)
 {
     struct header_tar file_header;
@@ -117,6 +123,7 @@ void write_header_gz(gzFile archive, const char *filename, int is_directory)
     gzwrite(archive, &file_header, sizeof(file_header));
 }
 
+// Function to add padding to the archive
 void add_padding(FILE *archive, int size)
 {
     char buffer[BLOCK_SIZE];
@@ -124,6 +131,7 @@ void add_padding(FILE *archive, int size)
     fwrite(buffer, 1, size, archive);
 }
 
+// Function to create and write the header to the archive
 void write_header(FILE *archive, const char *filename, int is_directory)
 {
     struct header_tar file_header;
@@ -161,6 +169,7 @@ void write_header(FILE *archive, const char *filename, int is_directory)
     fwrite(&file_header, 1, sizeof(file_header), archive);
 }
 
+// Function to skip to the next header in the archive
 void skip_to_next_header(gzFile archive, size_t fileSize)
 {
     // Calculate the number of blocks for the file content
