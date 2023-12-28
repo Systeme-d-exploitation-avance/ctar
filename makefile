@@ -42,6 +42,10 @@ coverage: all
 	gcov -o $(BUILD_DIR) $(SRCS)  # Generate coverage reports
 	mv *.gcov $(COVERAGE_DIR)  # Move the generated coverage files to the coverage directory
 
+# Target: Doxygen
+doxygen:
+	doxygen ./doc/Doxyfile
+
 # Target: clean
 clean:
 	rm -rf $(BUILD_DIR)
