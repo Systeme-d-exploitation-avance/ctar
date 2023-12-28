@@ -10,11 +10,11 @@ SRCS = $(wildcard $(SRC_DIR)/*.c)
 # Generate corresponding object file names
 OBJS = $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(SRCS))
 
-# Target: program
-all: $(BUILD_DIR)/program
+# Target: ctar
+all: $(BUILD_DIR)/ctar
 
-# Rule to build the program
-$(BUILD_DIR)/program: $(OBJS)
+# Rule to build the ctar
+$(BUILD_DIR)/ctar: $(OBJS)
 	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)
 
 # Rule to compile source files into object files

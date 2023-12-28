@@ -1,4 +1,5 @@
-// typedef.h
+/// \file
+/// \brief Defines the type of the header of a tar file.
 
 #ifndef TYPEDEF_H
 #define TYPEDEF_H

@@ -3,7 +3,7 @@
 #include <unistd.h>
 #include <getopt.h>
 #include "../include/archive.h"
-#include "../include/arg_parser.h"
+#include "../include/argParser.h"
 
 void print_help()
 {

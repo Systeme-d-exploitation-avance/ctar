@@ -9,7 +9,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include "../include/archive.h"
-#include "../include/arg_parser.h"
+#include "../include/argParser.h"
 
 /**
  * @brief The main function of the program.
