@@ -9,13 +9,14 @@ void print_help()
 {
     printf("Usage: program [OPTIONS] [ARCHIVE_FILE]\n");
     printf("Options:\n");
-    printf("  -l, --list        ARCHIVE_FILE            List contents of the archive\n");
-    printf("  -e, --extract     ARCHIVE_FILE            Extract the archive\n");
-    printf("  -c, --create      ARCHIVE_FILE            Create a new archive\n");
-    printf("  -d, --directory   DIRECTORY_TO_PROCESS    Specify the directory to process (used with -c and -e)\n");
-    printf("  -z, --compress                            Compress the archive (used with -c : exemple ./program -zc my.tar fileA)\n");
-    printf("  -v, --verbose                             Enable verbose mode\n");
-    printf("  -h, --help                                Display this help\n");
+    printf("  -l, --list        ARCHIVE_FILE                    List contents of the archive                (exemple : ./ctar -l my.tar(.gz))\n");
+    printf("  -e, --extract     ARCHIVE_FILE                    Extract the archive                         (exemple : ./ctar -e my.tar(.gz)) (-d can be used to set extraction directory)\n");
+    printf("  -c, --create      ARCHIVE_FILE [FILES/FOLDER]     Create a new archive (compressed or not)    (exemple : ./ctar -c my.tar(.gz) fileA FolderA)\n");
+    printf("  -d, --directory   DIRECTORY_TO_PROCESS            Specify the directory to process            (exemple : ./ctar -d myFolder -e my.tar(.gz)\n");
+    printf("  -z, --compress                                    Flag to compress the archive on creation    (exemple : ./ctar -zc my.tar fileA)\n");
+    printf("\n");
+    printf("  -v, --verbose                                     Enable verbose mode\n");
+    printf("  -h, --help                                        Display this help\n");
     exit(EXIT_SUCCESS);
 }
 
@@ -49,13 +50,6 @@ void parse_arguments(int argc, char *argv[])
             }
 
             archive_path = optarg;
-
-            if (optind < argc)
-            {
-                output_directory = argv[optind];
-                optind++; // Increment optind to move to the next argument
-            }
-
             printf("Listing archive %s :\n", archive_path);
             list_files(archive_path);
             break;
@@ -67,13 +61,6 @@ void parse_arguments(int argc, char *argv[])
             }
 
             archive_path = optarg;
-
-            if (optind < argc)
-            {
-                output_directory = argv[optind];
-                optind++;
-            }
-
             printf("Extracting archive %s to %s\n", archive_path, output_directory);
             extract_archive(archive_path, output_directory);
             printf("Done!\n");
@@ -111,8 +98,6 @@ void parse_arguments(int argc, char *argv[])
             break;
 
         case 'z':
-            // Set a flag indicating that compression is requested
-            printf("compress_flag set to 1\n");
             compress_flag = 1;
             break;
 
